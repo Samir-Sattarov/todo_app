@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app/core/local_api/task_local_api.dart';
 import 'package:todo_app/screens/create_task_screen.dart';
 import 'package:todo_app/widgets/task_card_widget.dart';
 
@@ -13,30 +14,19 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<TaskEntity> listTasks = [
-    TaskEntity(
-      title: "title",
-      description: "description",
-      date: DateTime.now(),
-      status: TaskStatus.todo,
-    ),
-    TaskEntity(
-      title: "title",
-      description: "description",
-      date: DateTime.now(),
-      status: TaskStatus.process,
-    ),
-    TaskEntity(
-      title: "title",
-      description: "description",
-      date: DateTime.now(),
-      status: TaskStatus.done,
-    ),
-  ];
+  List<TaskEntity> listTasks = [];
 
   @override
   void initState() {
+    initialize();
     super.initState();
+  }
+
+  initialize() async {
+    final listData = await TaskLocalApi.getAll();
+
+    listTasks = listData;
+    setState(() {});
   }
 
   @override
@@ -76,16 +66,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  _onCreateTask(String title, String description) {
+  _onCreateTask(String title, String description) async {
     final TaskEntity entity = TaskEntity(
       title: title,
       description: description,
       date: DateTime.now(),
       status: TaskStatus.todo,
     );
+    final result = await TaskLocalApi.save(entity);
 
-    listTasks.add(entity);
+    if (result) {
+      listTasks.add(entity);
 
-    setState(() {});
+      setState(() {});
+    }
   }
 }
