@@ -51,7 +51,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
           return Padding(
             padding: const EdgeInsets.all(8.0),
-            child: TaskCardWidget(entity: entity),
+            child: GestureDetector(
+              child: TaskCardWidget(entity: entity),
+              onTap: () {
+                listTasks.remove(entity);
+                setState(() {});
+              },
+            ),
           );
         },
         itemCount: listTasks.length,
@@ -80,8 +86,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     listTasks.add(entity);
 
-    setState(() {
-
-    });
+    setState(() {});
   }
 }
