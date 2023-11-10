@@ -5,6 +5,7 @@ import 'package:todo_app/widgets/task_card_widget.dart';
 
 import '../core/entity/task_entity.dart';
 import '../core/utils/animated_navigation.dart';
+import '../widgets/search_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -15,6 +16,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<TaskEntity> listTasks = [];
+
+  final TextEditingController controllerSearch = TextEditingController();
 
   @override
   void initState() {
@@ -29,28 +32,73 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
   }
 
+  _refresh() async {
+    listTasks = await TaskLocalApi.getAll();
+    setState(() {});
+  }
+
+  search(String search) async {
+    listTasks = await TaskLocalApi.getAll(search: search);
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Awesome TODO"),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await TaskLocalApi.deleteAllTasks();
+            },
+            icon: const Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+          ),
+          IconButton(
+            onPressed: () async => await _refresh(),
+            icon: const Icon(
+              Icons.refresh,
+            ),
+          ),
+        ],
       ),
-      body: ListView.builder(
-        itemBuilder: (context, index) {
-          final entity = listTasks[index];
-
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: GestureDetector(
-              child: TaskCardWidget(entity: entity),
-              onTap: () {
-                listTasks.remove(entity);
-                setState(() {});
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            SearchWidget(
+              controller: controllerSearch,
+              onChange: (p0) {
+                print("On change $p0");
+              },
+              onSubmit: (p0) {
+                print("On Submit $p0");
+                search(p0);
               },
             ),
-          );
-        },
-        itemCount: listTasks.length,
+            const SizedBox(height: 10),
+            Expanded(
+              child: ListView.builder(
+                physics: const ClampingScrollPhysics(),
+                itemBuilder: (context, index) {
+                  final entity = listTasks[index];
+
+                  return GestureDetector(
+                    child: TaskCardWidget(entity: entity),
+                    onTap: () {
+                      listTasks.remove(entity);
+                      setState(() {});
+                    },
+                  );
+                },
+                itemCount: listTasks.length,
+              ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -67,11 +115,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _onCreateTask(String title, String description) async {
+    final epochStart = DateTime.now().millisecondsSinceEpoch;
+
     final TaskEntity entity = TaskEntity(
       title: title,
       description: description,
       date: DateTime.now(),
       status: TaskStatus.todo,
+      id: epochStart.toString(),
     );
     final result = await TaskLocalApi.save(entity);
 

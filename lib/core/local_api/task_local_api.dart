@@ -17,17 +17,33 @@ class TaskLocalApi {
     }
   }
 
-  static Future<List<TaskEntity>> getAll() async {
-      final box = await Hive.openBox(HiveBoxConstants.tasksBox);
+  static Future<List<TaskEntity>> getAll({String search = ""}) async {
+    final box = await Hive.openBox(HiveBoxConstants.tasksBox);
 
-      final List<TaskEntity> listTasks = [];
-      for (var json in box.values) {
-        listTasks.add(TaskEntity.fromJson(Map.from(json)));
-      }
+    final List<TaskEntity> listTasks = [];
+
+    for (var json in box.values) {
+      listTasks.add(TaskEntity.fromJson(Map.from(json)));
+    }
 
 
-      return listTasks;
 
+    if(search.isNotEmpty) {
+      listTasks.removeWhere((element) => !element.title.contains(search));
+    }
+
+
+    return listTasks;
   }
 
+  static Future<bool> deleteAllTasks() async {
+    final box = await Hive.openBox(HiveBoxConstants.tasksBox);
+
+    try {
+      box.clear();
+      return Future.value(true);
+    } catch (error) {
+      return Future.value(false);
+    }
+  }
 }
