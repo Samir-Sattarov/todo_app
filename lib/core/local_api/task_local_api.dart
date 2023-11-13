@@ -16,7 +16,7 @@ class TaskLocalApi {
     }
   }
 
-  static Future<List<TaskEntity>> getAll({String search = "", DateTime? filterDate}) async {
+  static Future<List<TaskEntity>> getAll({String search = "", bool isDownDateFilter = false}) async {
     final box = await Hive.openBox(HiveBoxConstants.tasksBox);
 
     final List<TaskEntity> listTasks = [];
