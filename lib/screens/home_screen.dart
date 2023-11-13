@@ -42,6 +42,16 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
   }
 
+  delete(TaskEntity entity) async {
+    final result = await TaskLocalApi.delete(entity.id);
+
+    if (result) {
+      listTasks.remove(entity);
+    }
+
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,8 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   return GestureDetector(
                     child: TaskCardWidget(entity: entity),
                     onTap: () {
-                      listTasks.remove(entity);
-                      setState(() {});
+                      delete(entity);
                     },
                   );
                 },

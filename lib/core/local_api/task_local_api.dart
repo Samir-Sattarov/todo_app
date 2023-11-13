@@ -8,9 +8,8 @@ class TaskLocalApi {
     try {
       final box = await Hive.openBox(HiveBoxConstants.tasksBox);
 
-      box.add(entity.toJson());
+      box.put(entity.id, entity.toJson());
 
-      print("To json ${entity.toJson()}");
       return Future.value(true);
     } catch (error) {
       return Future.value(false);
@@ -46,13 +45,28 @@ class TaskLocalApi {
     }
   }
 
-  static Future<bool> delete(String id) async {
+  static Future<bool> delete(String taskId) async {
     final box = await Hive.openBox(HiveBoxConstants.tasksBox);
 
     try {
+      await box.delete(taskId);
+
       return Future.value(true);
     } catch (error) {
       return Future.value(false);
     }
   }
+
+//
+  // static Future<void> delete(String taskId) async {
+  //   final box = await Hive.openBox(HiveBoxConstants.tasksBox);
+  //   final taskList = box.values.toList();
+  //
+  //   final taskIndex = taskList.indexWhere((task) => task['id'] == taskId);
+  //   if (taskIndex != -1) {
+  //     await box.deleteAt(taskIndex);
+  //   }
+  //
+  //   await box.close();
+  // }
 }
