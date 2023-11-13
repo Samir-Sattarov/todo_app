@@ -73,6 +73,20 @@ class _HomeScreenState extends State<HomeScreen> {
               Icons.refresh,
             ),
           ),
+          IconButton(
+            onPressed: () async {},
+            icon: const Icon(
+              Icons.arrow_drop_up,
+            ),
+          ),
+          IconButton(
+            onPressed: () async {
+
+            },
+            icon: const Icon(
+              Icons.arrow_drop_down,
+            ),
+          ),
         ],
       ),
       body: Padding(
