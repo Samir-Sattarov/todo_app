@@ -26,12 +26,11 @@ class TaskLocalApi {
       listTasks.add(TaskEntity.fromJson(Map.from(json)));
     }
 
-
-
-    if(search.isNotEmpty) {
-      listTasks.removeWhere((element) => !element.title.contains(search));
+    if (search.isNotEmpty) {
+      listTasks.removeWhere((element) =>
+          !element.title.contains(search) &&
+          !element.description.contains(search));
     }
-
 
     return listTasks;
   }
@@ -41,6 +40,16 @@ class TaskLocalApi {
 
     try {
       box.clear();
+      return Future.value(true);
+    } catch (error) {
+      return Future.value(false);
+    }
+  }
+
+  static Future<bool> delete(String id) async {
+    final box = await Hive.openBox(HiveBoxConstants.tasksBox);
+
+    try {
       return Future.value(true);
     } catch (error) {
       return Future.value(false);
