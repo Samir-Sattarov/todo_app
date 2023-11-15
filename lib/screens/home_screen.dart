@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:todo_app/core/local_api/task_local_api.dart';
+import 'package:todo_app/core/utils/hive_box_constants.dart';
 import 'package:todo_app/screens/create_task_screen.dart';
 import 'package:todo_app/widgets/task_card_widget.dart';
 
@@ -28,30 +31,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   initialize() async {
-    final listData = await TaskLocalApi.getAll();
-
-    listTasks = listData;
-    setState(() {});
+    await TaskLocalApi.getAll();
   }
 
   _refresh({bool isDownDate = false}) async {
-    listTasks = await TaskLocalApi.getAll(isDownDateFilter: isDownDate);
-    setState(() {});
+    await TaskLocalApi.getAll(isDownDateFilter: isDownDate);
   }
 
   search(String search) async {
-    listTasks = await TaskLocalApi.getAll(search: search);
-    setState(() {});
+    await TaskLocalApi.getAll(search: search);
   }
 
   delete(TaskEntity entity) async {
-    final result = await TaskLocalApi.delete(entity.id);
-
-    if (result) {
-      listTasks.remove(entity);
-    }
-
-    setState(() {});
+    await TaskLocalApi.delete(entity.id);
   }
 
   @override
@@ -108,32 +100,30 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             const SizedBox(height: 10),
-            listTasks.isEmpty
-                ? Lottie.asset(
-                    Assets.tEmptyLottie,
-                    frameRate: FrameRate(120),
-                    animate: true,
-                    width: 300,
-                    height: 300,
-                    fit: BoxFit.cover,
+            Expanded(
+              child: ValueListenableBuilder<Box<TaskEntity>>(
+                valueListenable: Hive.box<TaskEntity>(HiveBoxConstants.tasksBox)
+                    .listenable(),
+                builder: (context, box, widget) {
+                  listTasks = box.values.toList();
+                  return ListView.builder(
+                    physics: const ClampingScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      final entity = listTasks[index];
 
-                  )
-                : Expanded(
-                    child: ListView.builder(
-                      physics: const ClampingScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        final entity = listTasks[index];
-
-                        return GestureDetector(
-                          child: TaskCardWidget(entity: entity),
-                          onTap: () {
-                            delete(entity);
-                          },
-                        );
-                      },
-                      itemCount: listTasks.length,
-                    ),
-                  ),
+                      return GestureDetector(
+                        child: TaskCardWidget(entity: entity),
+                        onTap: () {
+                          delete(entity);
+                        },
+                      );
+                    },
+                    itemCount: listTasks.length,
+                  );
+                },
+                child: Text("test"),
+              ),
+            ),
           ],
         ),
       ),
@@ -162,11 +152,5 @@ class _HomeScreenState extends State<HomeScreen> {
       id: epochStart.toString(),
     );
     final result = await TaskLocalApi.save(entity);
-
-    if (result) {
-      listTasks.add(entity);
-
-      setState(() {});
-    }
   }
 }

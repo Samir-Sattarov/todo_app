@@ -6,7 +6,7 @@ import '../entity/task_entity.dart';
 class TaskLocalApi {
   static Future<bool> save(TaskEntity entity) async {
     try {
-      final box = await Hive.openBox(HiveBoxConstants.tasksBox);
+      final box = await Hive.openBox<TaskEntity>(HiveBoxConstants.tasksBox);
 
       box.put(entity.id, entity);
 
@@ -18,11 +18,11 @@ class TaskLocalApi {
 
   static Future<List<TaskEntity>> getAll(
       {String search = "", bool isDownDateFilter = false}) async {
-    final box = await Hive.openBox(HiveBoxConstants.tasksBox);
+    final box = await Hive.openBox<TaskEntity>(HiveBoxConstants.tasksBox);
 
     List<TaskEntity> listTasks = [];
 
-    listTasks = List<TaskEntity>.from(box.values);
+    listTasks = box.values.toList();
 
     if (search.isNotEmpty) {
       listTasks.removeWhere((element) =>
@@ -40,7 +40,7 @@ class TaskLocalApi {
   }
 
   static Future<bool> deleteAllTasks() async {
-    final box = await Hive.openBox(HiveBoxConstants.tasksBox);
+    final box = await Hive.openBox<TaskEntity>(HiveBoxConstants.tasksBox);
 
     try {
       box.clear();
@@ -51,7 +51,7 @@ class TaskLocalApi {
   }
 
   static Future<bool> delete(String taskId) async {
-    final box = await Hive.openBox(HiveBoxConstants.tasksBox);
+    final box = await Hive.openBox<TaskEntity>(HiveBoxConstants.tasksBox);
 
     try {
       await box.delete(taskId);
