@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:todo_app/core/local_api/task_local_api.dart';
 import 'package:todo_app/screens/create_task_screen.dart';
 import 'package:todo_app/widgets/task_card_widget.dart';
 
 import '../core/entity/task_entity.dart';
 import '../core/utils/animated_navigation.dart';
+import '../core/utils/assets.dart';
 import '../widgets/search_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -32,8 +34,8 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
   }
 
-  _refresh() async {
-    listTasks = await TaskLocalApi.getAll();
+  _refresh({bool isDownDate = false}) async {
+    listTasks = await TaskLocalApi.getAll(isDownDateFilter: isDownDate);
     setState(() {});
   }
 
@@ -74,14 +76,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           IconButton(
-            onPressed: () async {},
+            onPressed: () async {
+              _refresh(isDownDate: false);
+            },
             icon: const Icon(
               Icons.arrow_drop_up,
             ),
           ),
           IconButton(
             onPressed: () async {
-
+              _refresh(isDownDate: true);
             },
             icon: const Icon(
               Icons.arrow_drop_down,
@@ -104,22 +108,32 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             const SizedBox(height: 10),
-            Expanded(
-              child: ListView.builder(
-                physics: const ClampingScrollPhysics(),
-                itemBuilder: (context, index) {
-                  final entity = listTasks[index];
+            listTasks.isEmpty
+                ? Lottie.asset(
+                    Assets.tEmptyLottie,
+                    frameRate: FrameRate(120),
+                    animate: true,
+                    width: 300,
+                    height: 300,
+                    fit: BoxFit.cover,
 
-                  return GestureDetector(
-                    child: TaskCardWidget(entity: entity),
-                    onTap: () {
-                      delete(entity);
-                    },
-                  );
-                },
-                itemCount: listTasks.length,
-              ),
-            ),
+                  )
+                : Expanded(
+                    child: ListView.builder(
+                      physics: const ClampingScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        final entity = listTasks[index];
+
+                        return GestureDetector(
+                          child: TaskCardWidget(entity: entity),
+                          onTap: () {
+                            delete(entity);
+                          },
+                        );
+                      },
+                      itemCount: listTasks.length,
+                    ),
+                  ),
           ],
         ),
       ),

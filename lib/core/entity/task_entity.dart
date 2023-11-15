@@ -1,14 +1,28 @@
+import 'package:hive/hive.dart';
+
+part 'task_entity.g.dart';
+
+@HiveType(typeId: 2)
 enum TaskStatus {
+  @HiveField(1)
   todo,
+  @HiveField(2)
   process,
+  @HiveField(3)
   done,
 }
 
+@HiveType(typeId: 1)
 class TaskEntity {
+  @HiveField(1)
   final String id;
+  @HiveField(2)
   final String title;
+  @HiveField(3)
   final String description;
+  @HiveField(4)
   final DateTime date;
+  @HiveField(5)
   final TaskStatus status;
 
   const TaskEntity({

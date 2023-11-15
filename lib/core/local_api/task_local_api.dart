@@ -8,7 +8,7 @@ class TaskLocalApi {
     try {
       final box = await Hive.openBox(HiveBoxConstants.tasksBox);
 
-      box.put(entity.id, entity.toJson());
+      box.put(entity.id, entity);
 
       return Future.value(true);
     } catch (error) {
@@ -16,19 +16,24 @@ class TaskLocalApi {
     }
   }
 
-  static Future<List<TaskEntity>> getAll({String search = "", bool isDownDateFilter = false}) async {
+  static Future<List<TaskEntity>> getAll(
+      {String search = "", bool isDownDateFilter = false}) async {
     final box = await Hive.openBox(HiveBoxConstants.tasksBox);
 
-    final List<TaskEntity> listTasks = [];
+    List<TaskEntity> listTasks = [];
 
-    for (var json in box.values) {
-      listTasks.add(TaskEntity.fromJson(Map.from(json)));
-    }
+    listTasks = List<TaskEntity>.from(box.values);
 
     if (search.isNotEmpty) {
       listTasks.removeWhere((element) =>
           !element.title.contains(search) &&
           !element.description.contains(search));
+    }
+
+    if (isDownDateFilter) {
+      listTasks.sort(
+        (a, b) => a.date.compareTo(b.date),
+      );
     }
 
     return listTasks;
