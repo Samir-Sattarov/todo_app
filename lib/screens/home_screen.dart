@@ -24,22 +24,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final TextEditingController controllerSearch = TextEditingController();
 
-  @override
-  void initState() {
-    initialize();
-    super.initState();
-  }
-
-  initialize() async {
-    await TaskLocalApi.getAll();
-  }
-
   _refresh({bool isDownDate = false}) async {
-    await TaskLocalApi.getAll(isDownDateFilter: isDownDate);
+    listTasks = await TaskLocalApi.getAll(isDownDateFilter: isDownDate);
+
+    setState(() {});
   }
 
   search(String search) async {
-    await TaskLocalApi.getAll(search: search);
+    listTasks = await TaskLocalApi.getAll(search: search);
+    setState(() {});
   }
 
   delete(TaskEntity entity) async {
